@@ -1,3 +1,8 @@
+.DS_Store
+
+# Don't upload the data
+*.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -1,5 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+import matplotlib.patches as patches
+
 from scipy.special import softmax
 import scipy.signal
 
@@ -140,7 +143,7 @@ def run_simulation(env_size=10, n_steps=500):
         agent.update_model(prev_state, action, state)
         agent.update_resources(resources)
 
-    return np.array(states), np.array(beliefs), np.array(resource_levels), env.grid, env.obstacles
+    return np.array(states), np.array(beliefs), np.array(resource_levels), env
 
 def visualize_simulation(states, beliefs, resource_levels, final_grid, obstacles):
     fig, axes = plt.subplots(2, 3, figsize=(13, 9))
@@ -185,8 +188,57 @@ def visualize_simulation(states, beliefs, resource_levels, final_grid, obstacles
     plt.tight_layout()
     plt.show()
 
-# Run the simulation and visualize the results
-env_size = 10
-n_steps = 1000
-states, beliefs, resource_levels, final_grid, obstacles = run_simulation(env_size, n_steps)
-visualize_simulation(states, beliefs, resource_levels, final_grid, obstacles)
+def animate_simulation(states, beliefs, resource_levels, env):
+    fig, ax = plt.subplots(figsize=(10, 10))
+    
+    # Plot obstacles
+    obstacle_map = ax.imshow(env.obstacles, cmap='binary', alpha=0.3)
+    
+    # Initialize resource plots
+    resource_plots = [ax.imshow(env.grid[:,:,i], cmap='YlOrRd', alpha=0.5, vmin=0, vmax=1) for i in range(2)]
+    
+    # Initialize agent plot
+    agent_plot, = ax.plot([], [], 'bo', markersize=10)
+    
+    # Initialize belief plots
+    belief_plots = [ax.imshow(beliefs[0,:,:,i], cmap='viridis', alpha=0.3, vmin=0, vmax=1) for i in range(2)]
+    
+    # Text for resource levels
+    resource_text = ax.text(0.02, 0.95, '', transform=ax.transAxes, verticalalignment='top')
+    
+    def init():
+        agent_plot.set_data([], [])
+        resource_text.set_text('')
+        return [agent_plot, resource_text] + resource_plots + belief_plots
+
+    def update(frame):
+        # Update agent position
+        agent_plot.set_data(states[frame][1], states[frame][0])
+        
+        # Update resource plots
+        for i, plot in enumerate(resource_plots):
+            plot.set_array(env.grid[:,:,i])
+        
+        # Update belief plots
+        for i, plot in enumerate(belief_plots):
+            plot.set_array(beliefs[frame,:,:,i])
+        
+        # Update resource level text
+        resource_text.set_text(f'Resource 1: {resource_levels[frame][0]:.2f}\nResource 2: {resource_levels[frame][1]:.2f}')
+        
+        return [agent_plot, resource_text] + resource_plots + belief_plots
+
+    anim = FuncAnimation(fig, update, frames=len(states), init_func=init, blit=True, interval=100)
+    
+    plt.close(fig)
+    return anim
+
+env_size = 15
+n_steps = 500
+states, beliefs, resource_levels, env = run_simulation(env_size, n_steps)
+
+# Create the animation
+anim = animate_simulation(states, beliefs, resource_levels, env)
+
+# Save the animation (optional)
+anim.save('agent_simulation.gif', writer='pillow', fps=10)

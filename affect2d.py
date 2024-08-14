@@ -21,9 +21,9 @@ class Environment:
     def place_resources(self):
         for _ in range(10):  # Place 10 of each resource type
             pos = self.get_random_free_position()
-            self.grid[pos[0], pos[1], 0] = np.random.uniform(0.5, 1.0)
+            self.grid[pos[0], pos[1], 0] = np.random.uniform(0.0, 1.0)
             pos = self.get_random_free_position()
-            self.grid[pos[1], pos[1], 1] = np.random.uniform(0.5, 1.0)
+            self.grid[pos[0], pos[1], 1] = np.random.uniform(0.0, 1.0)
 
     def step(self, action):
         # Move agent based on action (0: up, 1: right, 2: down, 3: left)

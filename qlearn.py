@@ -22,7 +22,7 @@ class QLearningAgent:
         td_error = td_target - self.q_table[state + (action,)]
         self.q_table[state + (action,)] += self.learning_rate * td_error
 
-def train_agent(env, agent, episodes=10000, max_steps=100):
+def train_agent(env, agent, episodes=20000, max_steps=200):
     for episode in range(episodes):
         state = env.reset()
         total_reward = 0
@@ -50,7 +50,7 @@ trained_agent = train_agent(env, agent)
 # Test the trained agent
 test_episodes = 100
 total_rewards = []
-max_test_steps = 100
+max_test_steps = 200
 
 # Test loop
 for _ in range(test_episodes):

@@ -22,23 +22,18 @@ class QLearningAgent:
         td_error = td_target - self.q_table[state + (action,)]
         self.q_table[state + (action,)] += self.learning_rate * td_error
 
-def train_agent(env, agent, episodes=10000):
+def train_agent(env, agent, episodes=10000, max_steps=100):
     for episode in range(episodes):
         state = env.reset()
-        done = False
         total_reward = 0
 
-        while not done:
+        for _ in range(max_steps):
             action = agent.get_action(tuple(state))
             next_state, resources = env.step(action)
-            reward = np.sum(resources)  # Simple reward function: sum of collected resources
+            reward = np.sum(resources)
             agent.update(tuple(state), action, reward, tuple(next_state))
             state = next_state
             total_reward += reward
-
-            # You can define your own termination condition
-            if total_reward > 10:  # For example, terminate if total reward exceeds 10
-                done = True
 
         if episode % 1000 == 0:
             print(f"Episode {episode}, Total Reward: {total_reward}")
@@ -55,21 +50,19 @@ trained_agent = train_agent(env, agent)
 # Test the trained agent
 test_episodes = 100
 total_rewards = []
+max_test_steps = 100
 
+# Test loop
 for _ in range(test_episodes):
     state = env.reset()
     episode_reward = 0
-    done = False
 
-    while not done:
+    for _ in range(max_test_steps):
         action = trained_agent.get_action(tuple(state))
         next_state, resources = env.step(action)
         reward = np.sum(resources)
         episode_reward += reward
         state = next_state
-
-        if episode_reward > 10:  # Same termination condition as in training
-            done = True
 
     total_rewards.append(episode_reward)
 
